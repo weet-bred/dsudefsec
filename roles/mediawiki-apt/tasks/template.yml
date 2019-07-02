@@ -1,0 +1,35 @@
+# Name: template/tasks/task.yml
+# Last updated: 6.21.19
+# Purpose: Be a template of a task called by the main
+
+# Important thing for tasks: They only execute if they haven't already been done. For example, ansible will skip copying the config file if there is a file in the destination location with the same contents. If the contents are different, ansible will overwrite the file on the target machine with our config file.
+
+# This uses yum to install the apache2 package for CentOS (it's called httpd here)
+- name: task|Install httpd
+  yum: 
+    name: httpd
+    state: present
+
+# This ensures the service is started and enabled
+- name: task|Start httpd
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+
+# This copies the httpd.conf file from the roles/template/files/ dir to /etc/httpd/conf/httpd.conf on the target machine
+# The 'notify' bit calls the handler named 'restart httpd' if the config file gets copied
+- name: task|Copy httpd config file
+  copy:
+    src: httpd.conf
+    dest: /etc/httpd/conf/httpd.conf
+    owner: root
+    group: root
+    mode: 644
+  notify: restart httpd
+
+# This creates a directory
+- name: task|Create a directory for fun
+  file:
+    path: /tmp/testdir
+    state: directory

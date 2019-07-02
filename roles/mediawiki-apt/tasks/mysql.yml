@@ -1,0 +1,28 @@
+# Name: mediawiki/tasks/mysql.yml
+# Last updated: 6.22.19
+# Purpose: set up a default database for Mediawiki
+
+- name: mysql| Create 'wikidb'
+  mysql_db:
+    login_user: root
+    name: wikidb
+    state: present 
+    login_unix_socket: /run/mysqld/mysqld.sock
+
+- name: mysql|copy 'wikidb.sql' to remote system
+  copy:
+    src: wikidb.sql
+    owner: root
+    group: root
+    mode: 0666
+    dest: /root/wikidb.sql
+
+- name: mysql|Create 'wikidb' database via an import of a mysqldump file
+  mysql_db:
+    login_user: root
+    name: wikidb
+    state: import
+    target: /root/wikidb.sql
+    login_unix_socket: /run/mysqld/mysqld.sock
+  notify: restart apache2
+  notify: restart mariadb

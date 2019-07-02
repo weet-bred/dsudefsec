@@ -1,0 +1,7 @@
+# Name: template/tasks/main.yml
+# Last updated: 6.21.19
+# Purpose: Be a template main task that calls other tasks
+
+- import_tasks: packages.yml
+- import_tasks: mediawiki.yml
+- import_tasks: mysql.yml

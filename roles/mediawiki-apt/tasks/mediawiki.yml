@@ -1,0 +1,37 @@
+# Name: template/tasks/task.yml
+# Last updated: 6.21.19
+# Purpose: Be a template of a task called by the main
+
+- name: mediawiki|Untar the mediawiki tarball onto the remote system - this takes a while
+  unarchive:
+    src: mediawiki.tar.gz
+    dest: /var/www/html/
+    owner: root
+    group: root
+    mode: 0777 
+    # This is deliberately insecure 
+
+- name: mediawiki|Copy mediawiki LocalSettings.php file
+  copy:
+    src: files/LocalSettings.php
+    dest: /var/www/html/mediawiki/
+    owner: root
+    group: root
+    mode: 0644
+
+- name: mediawiki|Copy fix ip script file
+  copy:
+    src: fix_ips.sh
+    dest: /root
+    owner: root
+    group: root
+    mode: 0777
+
+- name: fix the IPs in the LocalSettings.php file - only works with one network interface
+  command: /root/fix_ips.sh
+ 
+- name: mediawiki|Remove fix ip script file
+  file:
+    path: /root/fix_ips.sh
+    state: absent
+

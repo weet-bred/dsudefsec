@@ -1,0 +1,36 @@
+# Name: mediawiki/tasks/packages.yml
+# Last updated: 7.1.19
+# Purpose: install required packages for mediawiki
+
+- name: packages|Install easy_install so we can install PyMySQL
+  apt:
+    name: python-setuptools
+    state: present
+
+- name: packages|Install python mysql package
+  easy_install: 
+    name: PyMySQL
+    state: present
+
+- name: packages|Install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - apache2
+    - php7.0
+    - mariadb-server
+    - php7.0-mbstring
+    - php7.0-xml
+    - php7.0-mysql
+  notify: restart apache2
+
+# This ensures the service is started and enabled
+- name: packages|Start/enable services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - mariadb
+    - apache2

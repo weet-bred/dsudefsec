@@ -1,0 +1,11 @@
+# File: mediawiki-apt.yml
+# Last updated: 6.21.19
+# Purpose: install mediawiki on a machine
+
+
+# Run with `ansible-playbook -b ansible/playbooks/mediawiki.yml --limit [host]`
+
+- hosts: all
+  roles: 
+   - mediawiki-apt
+  gather_facts: False

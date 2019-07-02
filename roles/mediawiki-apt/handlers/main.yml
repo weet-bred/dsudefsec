@@ -1,0 +1,16 @@
+# Name: mediawiki/handlers/main.yml
+# Last updated: 7.1.19
+# Purpose: Handlers for the Mediawiki role
+
+- name: restart apache2 
+  service:
+    name: apache2
+    state: restarted
+
+- name: restart mariadb 
+  service:
+    name: mariadb
+    state: restarted
+
+#- name: clear cache
+#  command: yum clean all
