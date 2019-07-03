@@ -3,6 +3,13 @@
   become: yes
   become_method: sudo
   tasks:
+    - name: Check if rc.local exists
+      stat:
+        path: /etc/rc.local
+      register: file_details
+    - meta: end_play
+      when: file_details.stat.exists
+
     - name: Create rc.local service
       blockinfile:
         path: /etc/systemd/system/rc-local.service
