@@ -1,0 +1,39 @@
+--- Eric Graham, 06/30/19
+- hosts: dsuarch
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Install vsftpd
+      command: pacman -Sy --noconfirm vsftpd
+    - name: Start and enable vsftpd
+      service: name=vsftpd state=started enabled=yes
+    - name: Allow all vsftpd connections
+      lineinfile:
+        path: /etc/hosts.allow
+        create: yes
+        insertbefore: BOF
+        line: "vsftpd: ALL"
+        regexp: "vsftpd: (.*)"
+    - name: Enable uploading and local user login to vsftpd; disable anonymous users
+      lineinfile:
+        path: /etc/vsftpd.conf
+        line: "{{ item.ln }}"
+        regex: "{{ item.rgx }}"
+      with_items:
+        - { rgx: '#?write_enable=(.*)', ln: 'write_enable=YES' }
+        - { rgx: '#?local_enable=(.*)', ln: 'local_enable=YES' }
+        - { rgx: '#?anonymous_enable=(.*)', ln: 'anonymous_enable=NO' }
+    - name: Set up chroot jails
+      blockinfile:
+        path: /etc/vsftpd.conf
+        block: |
+          # Enable chroot jails
+          chroot_list_enable=YES
+          chroot_local_user=YES
+          chroot_list_file=/etc/vsftpd.chroot_list
+          
+          # Rate limiting
+          local_max_rate=100000
+          max_clients=50
+          max_per_ip=4
