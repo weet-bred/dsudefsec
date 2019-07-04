@@ -1,0 +1,55 @@
+- hosts: dsuarch
+  remote_user: root # Change to reflect needs
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Install Java, git, and screen
+      pacman:
+        name: jre-openjdk-headless git screen # JRE version 12
+        update_cache: yes
+    - name: Create server directories
+      file:
+        path: ~/minecraft_server/buildtools
+        state: directory
+        recurse: yes
+    - name: Download the latest version of Build Tools
+      get_url:
+        url: https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+        dest: ~/minecraft_server/buildtools/bt.jar
+        mode: 0555
+        force: yes
+    - name: Build Spigot
+      command: java -Xmx1024M -jar bt.jar
+      args:
+        chdir: ~/minecraft_server/buildtools
+    - name: Search for Spigot jar
+      find:
+        paths: ~/minecraft_server/buildtools
+        patterns: "spigot-.+\\.jar"
+        use_regex: yes
+      register: jar_matches
+    - name: Move Spigot jar to server directory
+      copy:
+        src: "{{ jar_matches.files[0].path }}"
+        dest: ~/minecraft_server/spigot.jar
+        remote_src: yes
+    - name: Accept the EULA
+      lineinfile:
+        path: ~/minecraft_server/eula.txt
+        create: yes
+        line: "eula: true"
+        regex: "eula: \\w*"
+    - name: Create server startup script
+      lineinfile:
+        path: ~/minecraft_server/start.sh
+        create: yes
+        mode: 0544
+        line: "{{ item.line }}"
+        regex: "{{ item.regex }}"
+      with_items:
+        - {line: "#!/bin/sh", regex: "#!/bin/.*"}
+        - {line: "screen -dm -S minecraft bash -c 'java -Xmx{{ (ansible_memory_mb.real.total * 0.8) | int }}M -jar spigot.jar' &", regex: "if .* screen .*"}
+    - name: Start server
+      command: ./start.sh
+      args:
+        chdir: ~/minecraft_server
