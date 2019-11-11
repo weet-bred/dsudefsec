@@ -1,4 +1,4 @@
-- hosts: gcminecraft
+- hosts: all
   remote_user: root # Change to reflect needs
   become: yes
   become_method: sudo
