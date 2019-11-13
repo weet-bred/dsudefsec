@@ -1,5 +1,5 @@
-- hosts: gcminecraft
-  remote_user: root # Change to reflect needs
+- hosts: dsu-mc
+  remote_user: eric # Change to reflect needs
   become: yes
   become_method: sudo
   tasks:
@@ -12,6 +12,10 @@
       yum:
         name: jre-openjdk, git, screen
       when: ansible_distribution == 'Fedora' or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    - name: Install Java, git, and screen (Debian)
+      apt:
+        name: openjdk-8-jdk git screen
+        update_cache: yes
       
     - name: Create server directories
       file:
