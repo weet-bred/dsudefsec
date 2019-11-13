@@ -9,11 +9,10 @@
         name: vsftpd
         update_cache: yes
       when: ansible_distribution == 'Arch Linux'
-      - name: Install vsftpd
-        yum:
-          name: vsftpd
+    - name: Install vsftpd
+      yum:
+        name: vsftpd
         when: ansible_distribution == 'Fedora' or ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
     - name: Start and enable vsftpd
       service: name=vsftpd state=started enabled=yes
     - name: Allow all vsftpd connections
