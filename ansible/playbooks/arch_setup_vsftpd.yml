@@ -1,5 +1,5 @@
 --- Eric Graham, 06/30/19
-- hosts: dsuarch
+- hosts: all
   remote_user: root
   become: yes
   become_method: sudo
