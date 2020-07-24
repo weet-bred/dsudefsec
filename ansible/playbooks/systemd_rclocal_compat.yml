@@ -1,0 +1,43 @@
+- hosts: dsuarch
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Check if rc.local exists
+      stat:
+        path: /etc/rc.local
+      register: file_details
+    - meta: end_play
+      when: file_details.stat.exists
+
+    - name: Create rc.local service
+      blockinfile:
+        path: /etc/systemd/system/rc-local.service
+        create: yes
+        owner: root
+        mode: 0644
+        block: |
+          [Unit]
+            Description=/etc/rc.local compat
+          [Service]
+            Type=forking
+            ExecStart=/etc/rc.local
+            TimeoutSec=0
+          [Install]
+            WantedBy=multi-user.target
+    - name: Create rc.local file
+      lineinfile:
+        path: /etc/rc.local
+        create: yes
+        owner: root
+        mode: 0744
+        insertbefore: BOF
+        regexp: "#!/bin/(.*)sh"
+        line: "#!/bin/sh"
+    - name: Make rc.local immutable
+      command: chattr +i /etc/rc.local
+    - name: Enable and start the rc.local service
+      service:
+        name: "rc-local"
+        state: started
+        enabled: yes
